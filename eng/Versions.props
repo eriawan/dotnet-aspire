@@ -72,6 +72,8 @@
     <MicrosoftExtensionsHttpVersion>9.0.2</MicrosoftExtensionsHttpVersion>
     <SystemFormatsAsn1Version>9.0.2</SystemFormatsAsn1Version>
     <SystemTextJsonVersion>9.0.2</SystemTextJsonVersion>
+    <!-- CLI integration-->
+    <StreamJsonRpcVersion>2.21.10</StreamJsonRpcVersion>
   </PropertyGroup>
   <!-- .NET 8.0 Package Versions -->
   <PropertyGroup Label="LTS">

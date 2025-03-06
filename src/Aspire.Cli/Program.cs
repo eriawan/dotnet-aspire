@@ -24,6 +24,8 @@ public class Program
 
         builder.Services.AddTransient<AppHostRunner>();
         builder.Services.AddTransient<DotNetCliRunner>();
+        builder.Services.AddSingleton<CliSocketServer>();
+        builder.Services.AddHostedService<CliSocketServer>(sp => sp.GetRequiredService<CliSocketServer>());
         var app = builder.Build();
         return app;
     }
