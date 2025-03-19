@@ -15,7 +15,6 @@ using Azure.Provisioning.KeyVault;
 using Azure.Provisioning.Roles;
 using Azure.Provisioning.Search;
 using Azure.Provisioning.Storage;
-using Azure.ResourceManager.KeyVault;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
