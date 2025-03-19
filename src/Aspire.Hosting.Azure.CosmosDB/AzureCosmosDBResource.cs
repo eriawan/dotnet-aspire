@@ -38,7 +38,7 @@ public class AzureCosmosDBResource(string name, Action<AzureResourceInfrastructu
     ///
     /// This is set when access key authentication is used. The connection string is stored in a secret in the Azure Key Vault.
     /// </summary>
-    internal AzureKeyVaultSecretReference? ConnectionStringSecretOutput { get; set; }
+    internal IKeyVaultSecretReference? ConnectionStringSecretOutput { get; set; }
 
     /// <summary>
     /// Gets a value indicating whether the resource uses access key authentication.

@@ -341,12 +341,12 @@ public static class AzureCosmosExtensions
     /// <param name="builder"></param>
     /// <param name="keyVaultBuilder"></param>
     /// <returns></returns>
-    public static IResourceBuilder<AzureCosmosDBResource> WithAccessKeyAuthentication(this IResourceBuilder<AzureCosmosDBResource> builder, IResourceBuilder<AzureKeyVaultResource> keyVaultBuilder)
+    public static IResourceBuilder<AzureCosmosDBResource> WithAccessKeyAuthentication(this IResourceBuilder<AzureCosmosDBResource> builder, IResourceBuilder<IKeyVaultResource> keyVaultBuilder)
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.Resource.ConnectionStringSecretOutput = new AzureKeyVaultSecretReference(
-            $"{builder.Resource.Name}--connectionString", keyVaultBuilder.Resource);
+        builder.Resource.ConnectionStringSecretOutput = keyVaultBuilder.Resource.GetSecretReference(
+            $"{builder.Resource.Name}--connectionString");
 
         builder.WithParameter(AzureBicepResource.KnownParameters.KeyVaultName, keyVaultBuilder.Resource.NameOutputReference);
 

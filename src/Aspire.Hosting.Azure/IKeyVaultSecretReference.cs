@@ -18,5 +18,5 @@ public interface IKeyVaultSecretReference : IValueProvider, IManifestExpressionP
     /// <summary>
     /// Gets the Azure Key Vault resource.
     /// </summary>
-    AzureBicepResource KeyVaultResource { get; }
+    IKeyVaultResource KeyVaultResource { get; }
 }

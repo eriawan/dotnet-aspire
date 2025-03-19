@@ -939,7 +939,7 @@ internal sealed class AzureContainerAppsInfrastructure(
                 if (!KeyVaultRefs.TryGetValue(secretOutputReference.KeyVaultResource.Name, out var kv))
                 {
                     // We resolve the keyvault that represents the storage for secret outputs
-                    var parameter = AllocateParameter(new BicepOutputReference("name", secretOutputReference.KeyVaultResource));
+                    var parameter = AllocateParameter(secretOutputReference.KeyVaultResource.NameOutputReference);
                     kv = KeyVaultService.FromExisting($"{parameter.BicepIdentifier}_kv");
                     kv.Name = parameter;
 

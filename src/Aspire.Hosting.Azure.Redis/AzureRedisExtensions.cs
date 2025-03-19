@@ -96,7 +96,7 @@ public static class AzureRedisExtensions
     /// This requires changes to the application code to use an azure credential to authenticate with the resource. See
     /// https://github.com/Azure/Microsoft.Azure.StackExchangeRedis for more information.
     ///
-    /// You can use the <see cref="WithAccessKeyAuthentication(IResourceBuilder{AzureRedisCacheResource}, IResourceBuilder{AzureKeyVaultResource})"/> method to configure the resource to use access key authentication.
+    /// You can use the <see cref="WithAccessKeyAuthentication(IResourceBuilder{AzureRedisCacheResource}, IResourceBuilder{IKeyVaultResource})"/> method to configure the resource to use access key authentication.
     /// </remarks>
     /// <example>
     /// The following example creates an Azure Cache for Redis resource and referencing that resource in a .NET project.
@@ -203,12 +203,12 @@ public static class AzureRedisExtensions
     /// <param name="builder">The Azure Cache for Redis resource builder.</param>
     /// <param name="keyVaultBuilder">The Azure Key Vault resource builder.</param>
     /// <returns>A reference to the <see cref="IResourceBuilder{T}"/> builder.</returns>
-    public static IResourceBuilder<AzureRedisCacheResource> WithAccessKeyAuthentication(this IResourceBuilder<AzureRedisCacheResource> builder, IResourceBuilder<AzureKeyVaultResource> keyVaultBuilder)
+    public static IResourceBuilder<AzureRedisCacheResource> WithAccessKeyAuthentication(this IResourceBuilder<AzureRedisCacheResource> builder, IResourceBuilder<IKeyVaultResource> keyVaultBuilder)
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(keyVaultBuilder);
 
-        builder.Resource.ConnectionStringSecretOutput = new AzureKeyVaultSecretReference($"{builder.Resource.Name}--connectionString", keyVaultBuilder.Resource);
+        builder.Resource.ConnectionStringSecretOutput = keyVaultBuilder.Resource.GetSecretReference($"{builder.Resource.Name}--connectionString");
         builder.WithParameter(AzureBicepResource.KnownParameters.KeyVaultName, keyVaultBuilder.Resource.NameOutputReference);
 
         return builder;
