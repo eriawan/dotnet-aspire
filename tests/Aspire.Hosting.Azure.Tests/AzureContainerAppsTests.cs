@@ -1863,8 +1863,10 @@ public class AzureContainerAppsTests(ITestOutputHelper output)
           "type": "azure.bicep.v0",
           "path": "api.module.bicep",
           "params": {
+            "api_roles_outputs_id": "{api-roles.outputs.id}",
+            "api_roles_outputs_clientid": "{api-roles.outputs.clientId}",
+            "mydb_kv_outputs_name": "{mydb-kv.outputs.name}",
             "mydb_secretoutputs": "{mydb.secretOutputs}",
-            "outputs_azure_container_registry_managed_identity_id": "{.outputs.AZURE_CONTAINER_REGISTRY_MANAGED_IDENTITY_ID}",
             "mydb_secretoutputs_connectionstring": "{mydb.secretOutputs.connectionString}",
             "mydb_secretoutputs_connectionstring1": "{mydb.secretOutputs.connectionString1}",
             "outputs_azure_container_apps_environment_id": "{.outputs.AZURE_CONTAINER_APPS_ENVIRONMENT_ID}"
@@ -1878,28 +1880,41 @@ public class AzureContainerAppsTests(ITestOutputHelper output)
         """
         @description('The location for the resource(s) to be deployed.')
         param location string = resourceGroup().location
-
+        
+        param api_roles_outputs_id string
+        
+        param api_roles_outputs_clientid string
+        
+        param mydb_kv_outputs_name string
+        
         param mydb_secretoutputs string
-
-        param outputs_azure_container_registry_managed_identity_id string
-
+        
         @secure()
         param mydb_secretoutputs_connectionstring string
-
+        
         @secure()
         param mydb_secretoutputs_connectionstring1 string
-
+        
         param outputs_azure_container_apps_environment_id string
-
+        
+        resource mydb_kv_outputs_name_kv 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+          name: mydb_kv_outputs_name
+        }
+        
         resource mydb_secretoutputs_kv 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
           name: mydb_secretoutputs
         }
-
+        
+        resource mydb_kv_outputs_name_kv_mydb__connectionString 'Microsoft.KeyVault/vaults/secrets@2023-07-01' existing = {
+          name: 'mydb--connectionString'
+          parent: mydb_kv_outputs_name_kv
+        }
+        
         resource mydb_secretoutputs_kv_connectionString 'Microsoft.KeyVault/vaults/secrets@2023-07-01' existing = {
           name: 'connectionString'
           parent: mydb_secretoutputs_kv
         }
-
+        
         resource api 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'api'
           location: location
@@ -1908,22 +1923,22 @@ public class AzureContainerAppsTests(ITestOutputHelper output)
               secrets: [
                 {
                   name: 'connectionstrings--mydb'
-                  identity: outputs_azure_container_registry_managed_identity_id
-                  keyVaultUrl: mydb_secretoutputs_kv_connectionString.properties.secretUri
+                  identity: api_roles_outputs_id
+                  keyVaultUrl: mydb_kv_outputs_name_kv_mydb__connectionString.properties.secretUri
                 }
                 {
                   name: 'connectionstring'
-                  identity: outputs_azure_container_registry_managed_identity_id
+                  identity: api_roles_outputs_id
                   keyVaultUrl: mydb_secretoutputs_kv_connectionString.properties.secretUri
                 }
                 {
                   name: 'secret0'
-                  identity: outputs_azure_container_registry_managed_identity_id
+                  identity: api_roles_outputs_id
                   keyVaultUrl: mydb_secretoutputs_kv_connectionString.properties.secretUri
                 }
                 {
                   name: 'secret1'
-                  identity: outputs_azure_container_registry_managed_identity_id
+                  identity: api_roles_outputs_id
                   keyVaultUrl: mydb_secretoutputs_kv_connectionString.properties.secretUri
                 }
                 {
@@ -1960,6 +1975,10 @@ public class AzureContainerAppsTests(ITestOutputHelper output)
                       name: 'complex'
                       secretRef: 'complex'
                     }
+                    {
+                      name: 'AZURE_CLIENT_ID'
+                      value: api_roles_outputs_clientid
+                    }
                   ]
                 }
               ]
@@ -1971,7 +1990,8 @@ public class AzureContainerAppsTests(ITestOutputHelper output)
           identity: {
             type: 'UserAssigned'
             userAssignedIdentities: {
-              '${outputs_azure_container_registry_managed_identity_id}': { }
+              '${api_roles_outputs_id}': { }
+              '': { }
             }
           }
         }
