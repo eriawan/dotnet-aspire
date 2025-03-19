@@ -346,7 +346,7 @@ public static class AzureCosmosExtensions
         ArgumentNullException.ThrowIfNull(builder);
 
         builder.Resource.ConnectionStringSecretOutput = new AzureKeyVaultSecretReference(
-            $"{keyVaultBuilder.Resource.Name}--connectionString", keyVaultBuilder.Resource);
+            $"{builder.Resource.Name}--connectionString", keyVaultBuilder.Resource);
 
         builder.WithParameter(AzureBicepResource.KnownParameters.KeyVaultName, keyVaultBuilder.Resource.NameOutputReference);
 

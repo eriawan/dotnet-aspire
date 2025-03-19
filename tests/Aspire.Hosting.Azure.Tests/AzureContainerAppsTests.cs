@@ -804,14 +804,14 @@ public class AzureContainerAppsTests(ITestOutputHelper output)
             "api_containerport": "{api.containerPort}",
             "mydb_outputs_connectionstring": "{mydb.outputs.connectionString}",
             "storage_outputs_blobendpoint": "{storage.outputs.blobEndpoint}",
-            "pg_secretoutputs": "{pg.secretOutputs}",
-            "outputs_azure_container_registry_managed_identity_id": "{.outputs.AZURE_CONTAINER_REGISTRY_MANAGED_IDENTITY_ID}",
+            "pg_kv_outputs_name": "{pg-kv.outputs.name}",
             "value0_value": "{value0.value}",
             "value1_value": "{value1.value}",
             "cs_connectionstring": "{cs.connectionString}",
             "outputs_azure_container_apps_environment_default_domain": "{.outputs.AZURE_CONTAINER_APPS_ENVIRONMENT_DEFAULT_DOMAIN}",
             "outputs_azure_container_apps_environment_id": "{.outputs.AZURE_CONTAINER_APPS_ENVIRONMENT_ID}",
             "outputs_azure_container_registry_endpoint": "{.outputs.AZURE_CONTAINER_REGISTRY_ENDPOINT}",
+            "outputs_azure_container_registry_managed_identity_id": "{.outputs.AZURE_CONTAINER_REGISTRY_MANAGED_IDENTITY_ID}",
             "api_containerimage": "{api.containerImage}"
           }
         }
@@ -825,10 +825,13 @@ public class AzureContainerAppsTests(ITestOutputHelper output)
           "type": "azure.bicep.v0",
           "path": "api-roles.module.bicep",
           "params": {
-            "storage_outputs_name": "{storage.outputs.name}"
+            "storage_outputs_name": "{storage.outputs.name}",
+            "pg_kv_outputs_name": "{pg-kv.outputs.name}"
           }
         }
         """;
+
+        var r = rolesManifest.ToString();
 
         Assert.Equal(expectedRolesManifest, rolesManifest.ToString());
 
@@ -836,46 +839,46 @@ public class AzureContainerAppsTests(ITestOutputHelper output)
         """
         @description('The location for the resource(s) to be deployed.')
         param location string = resourceGroup().location
-
+        
         param api_roles_outputs_id string
-
+        
         param api_roles_outputs_clientid string
-
+        
         param api_containerport string
-
+        
         param mydb_outputs_connectionstring string
-
+        
         param storage_outputs_blobendpoint string
-
-        param pg_secretoutputs string
-
-        param outputs_azure_container_registry_managed_identity_id string
-
+        
+        param pg_kv_outputs_name string
+        
         @secure()
         param value0_value string
-
+        
         param value1_value string
-
+        
         @secure()
         param cs_connectionstring string
-
+        
         param outputs_azure_container_apps_environment_default_domain string
-
+        
         param outputs_azure_container_apps_environment_id string
-
+        
         param outputs_azure_container_registry_endpoint string
-
+        
+        param outputs_azure_container_registry_managed_identity_id string
+        
         param api_containerimage string
-
-        resource pg_secretoutputs_kv 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
-          name: pg_secretoutputs
+        
+        resource pg_kv_outputs_name_kv 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+          name: pg_kv_outputs_name
         }
-
-        resource pg_secretoutputs_kv_db_connectionString 'Microsoft.KeyVault/vaults/secrets@2023-07-01' existing = {
-          name: 'db-connectionString'
-          parent: pg_secretoutputs_kv
+        
+        resource pg_kv_outputs_name_kv_pg__db_connectionString 'Microsoft.KeyVault/vaults/secrets@2023-07-01' existing = {
+          name: 'pg--db-connectionString'
+          parent: pg_kv_outputs_name_kv
         }
-
+        
         resource api 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'api'
           location: location
@@ -884,8 +887,8 @@ public class AzureContainerAppsTests(ITestOutputHelper output)
               secrets: [
                 {
                   name: 'connectionstrings--db'
-                  identity: outputs_azure_container_registry_managed_identity_id
-                  keyVaultUrl: pg_secretoutputs_kv_db_connectionString.properties.secretUri
+                  identity: api_roles_outputs_id
+                  keyVaultUrl: pg_kv_outputs_name_kv_pg__db_connectionString.properties.secretUri
                 }
                 {
                   name: 'secretval'
@@ -1042,18 +1045,20 @@ public class AzureContainerAppsTests(ITestOutputHelper output)
         """
         @description('The location for the resource(s) to be deployed.')
         param location string = resourceGroup().location
-
+        
         param storage_outputs_name string
-
+        
+        param pg_kv_outputs_name string
+        
         resource api_identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
           name: take('api_identity-${uniqueString(resourceGroup().id)}', 128)
           location: location
         }
-
+        
         resource storage 'Microsoft.Storage/storageAccounts@2024-01-01' existing = {
           name: storage_outputs_name
         }
-
+        
         resource storage_StorageBlobDataContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
           name: guid(storage.id, api_identity.id, subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'))
           properties: {
@@ -1063,7 +1068,7 @@ public class AzureContainerAppsTests(ITestOutputHelper output)
           }
           scope: storage
         }
-
+        
         resource storage_StorageTableDataContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
           name: guid(storage.id, api_identity.id, subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'))
           properties: {
@@ -1073,7 +1078,7 @@ public class AzureContainerAppsTests(ITestOutputHelper output)
           }
           scope: storage
         }
-
+        
         resource storage_StorageQueueDataContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
           name: guid(storage.id, api_identity.id, subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '974c5e8b-45b9-4653-ba55-5f855dd0fb88'))
           properties: {
@@ -1083,11 +1088,25 @@ public class AzureContainerAppsTests(ITestOutputHelper output)
           }
           scope: storage
         }
-
+        
+        resource pg_kv 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+          name: pg_kv_outputs_name
+        }
+        
+        resource pg_kv_KeyVaultAdministrator 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+          name: guid(pg_kv.id, api_identity.id, subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '00482a5a-887f-4fb3-b363-3b7fe8e74483'))
+          properties: {
+            principalId: api_identity.properties.principalId
+            roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '00482a5a-887f-4fb3-b363-3b7fe8e74483')
+            principalType: 'ServicePrincipal'
+          }
+          scope: pg_kv
+        }
+        
         output id string = api_identity.id
-
+        
         output clientId string = api_identity.properties.clientId
-
+        
         output principalId string = api_identity.properties.principalId
         """;
 

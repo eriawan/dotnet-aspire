@@ -1080,7 +1080,9 @@ internal sealed class AzureContainerAppsInfrastructure(
 
                 foreach (var s in Secrets)
                 {
-                    if (s.KeyVaultUri is not null && containerAppIdentityId is not null)
+                    IBicepValue keyVaultUri = s.KeyVaultUri;
+
+                    if (keyVaultUri.Kind != BicepValueKind.Unset && containerAppIdentityId is not null)
                     {
                         s.Identity = containerAppIdentityId;
                     }

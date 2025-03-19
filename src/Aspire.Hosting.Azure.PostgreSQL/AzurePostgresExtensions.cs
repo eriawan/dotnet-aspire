@@ -437,7 +437,7 @@ public static class AzurePostgresExtensions
             var secret = new KeyVaultSecret("connectionString")
             {
                 Parent = keyVault,
-                Name = "connectionString",
+                Name = $"{azureResource.Name}--connectionString",
                 Properties = new SecretProperties
                 {
                     Value = BicepFunction.Interpolate($"Host={postgres.FullyQualifiedDomainName};Username={administratorLogin};Password={administratorLoginPassword}")
@@ -450,7 +450,7 @@ public static class AzurePostgresExtensions
                 var dbSecret = new KeyVaultSecret(Infrastructure.NormalizeBicepIdentifier(database.Key + "_connectionString"))
                 {
                     Parent = keyVault,
-                    Name = AzurePostgresFlexibleServerResource.GetDatabaseKeyVaultSecretName(database.Key),
+                    Name = AzurePostgresFlexibleServerResource.GetDatabaseKeyVaultSecretName(azureResource.Name, database.Key),
                     Properties = new SecretProperties
                     {
                         Value = BicepFunction.Interpolate($"Host={postgres.FullyQualifiedDomainName};Username={administratorLogin};Password={administratorLoginPassword};Database={database.Value}")
