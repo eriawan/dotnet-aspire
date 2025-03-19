@@ -329,8 +329,26 @@ public static class AzureCosmosExtensions
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        var azureResource = builder.Resource;
-        azureResource.ConnectionStringSecretOutput = new BicepSecretOutputReference("connectionString", azureResource);
+        var kv = builder.ApplicationBuilder.AddAzureKeyVault($"{builder.Resource.Name}-kv")
+                                           .WithParentRelationship(builder.Resource);
+
+        return builder.WithAccessKeyAuthentication(kv);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="keyVaultBuilder"></param>
+    /// <returns></returns>
+    public static IResourceBuilder<AzureCosmosDBResource> WithAccessKeyAuthentication(this IResourceBuilder<AzureCosmosDBResource> builder, IResourceBuilder<AzureKeyVaultResource> keyVaultBuilder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+
+        builder.Resource.ConnectionStringSecretOutput = new AzureKeyVaultSecretReference(
+            $"{keyVaultBuilder.Resource.Name}--connectionString", keyVaultBuilder.Resource);
+
+        builder.WithParameter(AzureBicepResource.KnownParameters.KeyVaultName, keyVaultBuilder.Resource.NameOutputReference);
 
         return builder;
     }
@@ -408,7 +426,7 @@ public static class AzureCosmosExtensions
             var secret = new KeyVaultSecret("connectionString")
             {
                 Parent = keyVault,
-                Name = "connectionString",
+                Name = $"{azureResource.Name}--connectionString",
                 Properties = new SecretProperties
                 {
                     Value = BicepFunction.Interpolate($"AccountEndpoint={cosmosAccount.DocumentEndpoint};AccountKey={cosmosAccount.GetKeys().PrimaryMasterKey}")

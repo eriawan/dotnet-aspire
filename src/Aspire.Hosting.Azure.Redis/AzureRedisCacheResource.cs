@@ -26,7 +26,7 @@ public class AzureRedisCacheResource(string name, Action<AzureResourceInfrastruc
     ///
     /// This is set when access key authentication is used. The connection string is stored in a secret in the Azure Key Vault.
     /// </summary>
-    internal BicepSecretOutputReference? ConnectionStringSecretOutput { get; set; }
+    internal AzureKeyVaultSecretReference? ConnectionStringSecretOutput { get; set; }
 
     /// <summary>
     /// Gets a value indicating whether the resource uses access key authentication.
