@@ -251,6 +251,10 @@ public class AzureBicepResourceTests(ITestOutputHelper output)
         var db = cosmos.AddCosmosDatabase("db", databaseName: "mydatabase");
         db.AddContainer("container", "mypartitionkeypath", containerName: "mycontainer");
 
+        var kv = builder.CreateResourceBuilder<AzureKeyVaultResource>("cosmos-kv");
+
+        kv.Resource.Secrets["cosmos--connectionString"] = "mycosmosconnectionstring";
+
         var manifest = await AzureManifestUtils.GetManifestWithBicep(cosmos.Resource);
 
         var expectedManifest = """
