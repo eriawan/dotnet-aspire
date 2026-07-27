@@ -67,6 +67,12 @@ public partial class FoundryModel
         public static readonly FoundryModel ClaudeOpus48 = new() { Name = "claude-opus-4-8", Version = "2", Format = "Anthropic" };
 
         /// <summary>
+        /// Claude Opus 5 is Anthropic's most advanced Opus model, powering long-running agents while delivering improvements in coding and professional work. It brings near-Fable intelligence to the model teams rely on daily for long-horizon coding and complex agenti
+        /// </summary>
+        [AspireValue("FoundryModels")]
+        public static readonly FoundryModel ClaudeOpus5 = new() { Name = "claude-opus-5", Version = "2", Format = "Anthropic" };
+
+        /// <summary>
         /// Claude Sonnet 4.5 is Anthropic's most capable model for complex agents and an industry leader for coding and computer use.
         /// </summary>
         [AspireValue("FoundryModels")]
@@ -1397,6 +1403,12 @@ public partial class FoundryModel
         /// </summary>
         [AspireValue("FoundryModels")]
         public static readonly FoundryModel MaiVoice2 = new() { Name = "MAI-Voice-2", Version = "2026-06-02", Format = "Microsoft" };
+
+        /// <summary>
+        /// MAI-Voice-2-Flash is a text-to-speech (TTS) model built for ultra-fast, low-latency generation. It delivers high-fidelity, natural, and expressive speech across 15 languages, while being optimized for real-time responsiveness for voice agents, assistants,
+        /// </summary>
+        [AspireValue("FoundryModels")]
+        public static readonly FoundryModel MaiVoice2Flash = new() { Name = "MAI-Voice-2-Flash", Version = "2026-07-22", Format = "Microsoft" };
 
         /// <summary>
         /// Model router is a deployable AI model that is trained to select the most suitable large language model (LLM) for a given prompt.
